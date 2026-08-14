@@ -1,13 +1,13 @@
 {
   "name": "inline-json-for-html",
   "version": "0.1.0",
-  "description": "Dependency-free JSON serialization for safe embedding in HTML script elements.",
+  "description": "Dependency-free JSON serialization for HTML script-element text.",
   "author": "Edilec Private Limited",
   "license": "MIT",
   "type": "module",
   "sideEffects": false,
   "engines": {
-    "node": ">=20"
+    "node": ">=22"
   },
   "exports": {
     ".": {

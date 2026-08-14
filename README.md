@@ -16,7 +16,7 @@ escaping the characters that are significant in that parsing context.
 npm install github:edilec/inline-json-for-html#v0.1.0
 ```
 
-Node.js 20 or newer is supported.
+Node.js 22 or newer is supported.
 
 ## Serialize JSON
 
@@ -61,7 +61,8 @@ The serializer uses JSON Unicode escapes for `<`, `>`, `&`, U+2028, and U+2029.
 - It does not make a string safe for an event handler, URL, style declaration,
   JavaScript source expression, or arbitrary HTML attribute.
 - Native `JSON.stringify` behavior still applies. Cyclic values and `BigInt`
-  values throw, and unsupported object properties are omitted.
+  values throw, unsupported object properties are omitted, and getters,
+  `toJSON`, and replacer callbacks execute normally.
 - A top-level value that `JSON.stringify` cannot represent throws instead of
   returning an ambiguous result.
 - Parse the embedded value with `JSON.parse`; do not execute it as JavaScript.

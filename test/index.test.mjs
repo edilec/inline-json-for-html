@@ -36,6 +36,16 @@ test('escapes HTML-significant characters and JavaScript line separators', () =>
   assert.equal(JSON.parse(serialized), value)
 })
 
+test('escapes dangerous characters in keys, values, and mixed-case terminators', () => {
+  const value = {
+    '</ScRiPt><img src=x onerror=alert(1)>': '<!-- <SCRIPT> </script > &',
+  }
+  const serialized = serializeInlineJson(value)
+
+  assert.doesNotMatch(serialized, /[<>&\u2028\u2029]/u)
+  assert.deepEqual(JSON.parse(serialized), value)
+})
+
 test('supports native replacer and spacing options without mutating input', () => {
   const value = { keep: '<value>', omit: 'private' }
   const snapshot = structuredClone(value)
@@ -46,6 +56,42 @@ test('supports native replacer and spacing options without mutating input', () =
 
   assert.equal(serialized, '{\n  "keep": "\\u003Cvalue\\u003E"\n}')
   assert.deepEqual(value, snapshot)
+})
+
+test('escapes values produced by replacer functions and toJSON methods', () => {
+  const value = {
+    replacement: 'initial',
+    nested: {
+      toJSON() {
+        return '</script from toJSON>'
+      },
+    },
+  }
+  const serialized = serializeInlineJson(value, {
+    replacer(key, entry) {
+      return key === 'replacement' ? '<from replacer & value>' : entry
+    },
+  })
+
+  assert.doesNotMatch(serialized, /[<>&\u2028\u2029]/u)
+  assert.deepEqual(JSON.parse(serialized), {
+    replacement: '<from replacer & value>',
+    nested: '</script from toJSON>',
+  })
+})
+
+test('retains native handling for dates, non-finite numbers, emoji, and lone surrogates', () => {
+  const value = {
+    date: new Date('2026-08-14T00:00:00.000Z'),
+    nan: Number.NaN,
+    positiveInfinity: Number.POSITIVE_INFINITY,
+    negativeInfinity: Number.NEGATIVE_INFINITY,
+    emoji: '🛠️',
+    loneSurrogate: '\ud800',
+  }
+  const serialized = serializeInlineJson(value, { space: 10 })
+
+  assert.deepEqual(JSON.parse(serialized), JSON.parse(JSON.stringify(value)))
 })
 
 test('rejects invalid options and spacing that could produce invalid JSON', () => {
