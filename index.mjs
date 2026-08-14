@@ -6,14 +6,6 @@ const JSON_ESCAPES = Object.freeze({
   '\u2029': '\\u2029',
 })
 
-const HTML_ATTRIBUTE_ESCAPES = Object.freeze({
-  '&': '&amp;',
-  '"': '&quot;',
-  "'": '&#39;',
-  '<': '&lt;',
-  '>': '&gt;',
-})
-
 function assertOptions(options) {
   if (options === undefined) return {}
 
@@ -24,8 +16,13 @@ function assertOptions(options) {
   return options
 }
 
-function escapeHtmlAttribute(value) {
-  return value.replace(/[&"'<>]/g, (character) => HTML_ATTRIBUTE_ESCAPES[character])
+function assertSpace(space) {
+  if (
+    space !== undefined &&
+    (!Number.isInteger(space) || space < 0 || space > 10)
+  ) {
+    throw new TypeError('Space must be an integer from 0 through 10 when provided.')
+  }
 }
 
 /**
@@ -33,11 +30,12 @@ function escapeHtmlAttribute(value) {
  * HTML script element.
  *
  * @param {unknown} value
- * @param {{ replacer?: ((this: unknown, key: string, value: unknown) => unknown) | readonly (string | number)[], space?: string | number }} [options]
+ * @param {{ replacer?: ((this: unknown, key: string, value: unknown) => unknown) | readonly (string | number)[], space?: number }} [options]
  * @returns {string}
  */
 export function serializeInlineJson(value, options) {
   const { replacer, space } = assertOptions(options)
+  assertSpace(space)
   const serialized = JSON.stringify(value, replacer, space)
 
   if (serialized === undefined) {
@@ -45,25 +43,4 @@ export function serializeInlineJson(value, options) {
   }
 
   return serialized.replace(/[<>&\u2028\u2029]/g, (character) => JSON_ESCAPES[character])
-}
-
-/**
- * Create a complete application/json script element with an optional id.
- *
- * @param {unknown} value
- * @param {{ id?: string, replacer?: ((this: unknown, key: string, value: unknown) => unknown) | readonly (string | number)[], space?: string | number }} [options]
- * @returns {string}
- */
-export function createInlineJsonScript(value, options) {
-  const normalizedOptions = assertOptions(options)
-  const { id, replacer, space } = normalizedOptions
-
-  if (id !== undefined && (typeof id !== 'string' || id.length === 0)) {
-    throw new TypeError('The script id must be a non-empty string when provided.')
-  }
-
-  const idAttribute = id === undefined ? '' : ` id="${escapeHtmlAttribute(id)}"`
-  const serialized = serializeInlineJson(value, { replacer, space })
-
-  return `<script type="application/json"${idAttribute}>${serialized}</script>`
 }

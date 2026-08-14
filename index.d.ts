@@ -4,19 +4,10 @@ export type InlineJsonReplacer =
 
 export interface SerializeInlineJsonOptions {
   replacer?: InlineJsonReplacer
-  space?: string | number
-}
-
-export interface CreateInlineJsonScriptOptions extends SerializeInlineJsonOptions {
-  id?: string
+  space?: number
 }
 
 export declare function serializeInlineJson(
   value: unknown,
   options?: SerializeInlineJsonOptions,
-): string
-
-export declare function createInlineJsonScript(
-  value: unknown,
-  options?: CreateInlineJsonScriptOptions,
 ): string

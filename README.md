@@ -37,28 +37,14 @@ The serialized text remains valid JSON:
 const valueAgain = JSON.parse(serialized)
 ```
 
-`serializeInlineJson` accepts the native `JSON.stringify` replacer and spacing
-options:
+`serializeInlineJson` accepts a native `JSON.stringify` replacer and a numeric
+spacing option from 0 through 10:
 
 ```js
 serializeInlineJson(value, {
   replacer: ['message'],
   space: 2,
 })
-```
-
-## Create the script element
-
-For the common case, the package can build the complete element and safely
-encode its optional `id` attribute:
-
-```js
-import { createInlineJsonScript } from 'inline-json-for-html'
-
-const html = createInlineJsonScript(
-  { project: 'Edilec', tags: ['software', 'AI'] },
-  { id: 'project-data' },
-)
 ```
 
 ## What it escapes
@@ -70,6 +56,8 @@ The serializer uses JSON Unicode escapes for `<`, `>`, `&`, U+2028, and U+2029.
 
 - This package is for JSON placed as the text content of an HTML script
   element. It is not a general-purpose HTML sanitizer.
+- It returns JSON text only. Your application remains responsible for creating
+  the surrounding script element and safely handling its attributes.
 - It does not make a string safe for an event handler, URL, style declaration,
   JavaScript source expression, or arbitrary HTML attribute.
 - Native `JSON.stringify` behavior still applies. Cyclic values and `BigInt`

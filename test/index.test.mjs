@@ -1,7 +1,7 @@
 import assert from 'node:assert/strict'
 import test from 'node:test'
 
-import { createInlineJsonScript, serializeInlineJson } from '../index.mjs'
+import { serializeInlineJson } from '../index.mjs'
 
 test('round-trips ordinary nested JSON values', () => {
   const value = {
@@ -48,36 +48,19 @@ test('supports native replacer and spacing options without mutating input', () =
   assert.deepEqual(value, snapshot)
 })
 
-test('creates an application/json script and encodes its id attribute', () => {
-  const html = createInlineJsonScript(
-    { text: '</script>' },
-    { id: 'page-data" onload="alert(1)' },
-  )
-
-  assert.equal(
-    html,
-    '<script type="application/json" id="page-data&quot; onload=&quot;alert(1)">{"text":"\\u003C/script\\u003E"}</script>',
-  )
-  assert.equal(html.includes(' onload="'), false)
-})
-
-test('omits the id attribute when it is not provided', () => {
-  assert.equal(
-    createInlineJsonScript({ ready: true }),
-    '<script type="application/json">{"ready":true}</script>',
-  )
-})
-
-test('rejects invalid options and invalid script ids', () => {
+test('rejects invalid options and spacing that could produce invalid JSON', () => {
   assert.throws(() => serializeInlineJson({}, null), /Options must be an object/)
   assert.throws(() => serializeInlineJson({}, []), /Options must be an object/)
-  assert.throws(() => createInlineJsonScript({}, { id: '' }), /non-empty string/)
-  assert.throws(() => createInlineJsonScript({}, { id: 42 }), /non-empty string/)
+  assert.throws(() => serializeInlineJson({}, { space: '  ' }), /integer from 0 through 10/)
+  assert.throws(() => serializeInlineJson({}, { space: -1 }), /integer from 0 through 10/)
+  assert.throws(() => serializeInlineJson({}, { space: 11 }), /integer from 0 through 10/)
+  assert.throws(() => serializeInlineJson({}, { space: 1.5 }), /integer from 0 through 10/)
 })
 
 test('rejects an unsupported top-level value', () => {
   assert.throws(() => serializeInlineJson(undefined), /top-level value/)
   assert.throws(() => serializeInlineJson(Symbol('value')), /top-level value/)
+  assert.throws(() => serializeInlineJson(() => {}), /top-level value/)
 })
 
 test('retains native JSON.stringify failures for BigInt and cyclic data', () => {
