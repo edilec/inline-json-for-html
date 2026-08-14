@@ -1,8 +1,92 @@
 # inline-json-for-html
 
-A small, dependency-free Node.js utility for serializing JSON so it can be embedded safely inside an HTML `<script>` element.
+[![CI](https://github.com/edilec/inline-json-for-html/actions/workflows/ci.yml/badge.svg)](https://github.com/edilec/inline-json-for-html/actions/workflows/ci.yml)
 
-The implementation is being prepared in a reviewed pull request.
+A small, dependency-free Node.js utility for serializing JSON for an HTML
+`<script type="application/json">` element.
+
+HTML treats the contents of a script element as raw text. A JSON string that
+contains `</script>` can therefore close the element before an application has
+a chance to call `JSON.parse`. This package preserves the JSON value while
+escaping the characters that are significant in that parsing context.
+
+## Install
+
+```sh
+npm install github:edilec/inline-json-for-html#v0.1.0
+```
+
+Node.js 20 or newer is supported.
+
+## Serialize JSON
+
+```js
+import { serializeInlineJson } from 'inline-json-for-html'
+
+const value = {
+  message: '</script><script>alert("not executed")</script>',
+}
+
+const serialized = serializeInlineJson(value)
+const html = `<script type="application/json" id="page-data">${serialized}</script>`
+```
+
+The serialized text remains valid JSON:
+
+```js
+const valueAgain = JSON.parse(serialized)
+```
+
+`serializeInlineJson` accepts the native `JSON.stringify` replacer and spacing
+options:
+
+```js
+serializeInlineJson(value, {
+  replacer: ['message'],
+  space: 2,
+})
+```
+
+## Create the script element
+
+For the common case, the package can build the complete element and safely
+encode its optional `id` attribute:
+
+```js
+import { createInlineJsonScript } from 'inline-json-for-html'
+
+const html = createInlineJsonScript(
+  { project: 'Edilec', tags: ['software', 'AI'] },
+  { id: 'project-data' },
+)
+```
+
+## What it escapes
+
+The serializer uses JSON Unicode escapes for `<`, `>`, `&`, U+2028, and U+2029.
+`JSON.parse` reconstructs the original values.
+
+## Boundaries
+
+- This package is for JSON placed as the text content of an HTML script
+  element. It is not a general-purpose HTML sanitizer.
+- It does not make a string safe for an event handler, URL, style declaration,
+  JavaScript source expression, or arbitrary HTML attribute.
+- Native `JSON.stringify` behavior still applies. Cyclic values and `BigInt`
+  values throw, and unsupported object properties are omitted.
+- A top-level value that `JSON.stringify` cannot represent throws instead of
+  returning an ambiguous result.
+- Parse the embedded value with `JSON.parse`; do not execute it as JavaScript.
+
+## Development
+
+```sh
+npm test
+npm pack --dry-run
+```
+
+See [CONTRIBUTING.md](./CONTRIBUTING.md) for the contribution workflow and
+[SECURITY.md](./SECURITY.md) for private vulnerability reporting.
 
 ## License
 
