@@ -1,0 +1,35 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1280" height="640" viewBox="0 0 1280 640" role="img" aria-labelledby="title description">
+  <title id="title">inline-json-for-html by Edilec</title>
+  <desc id="description">A graphite repository preview with the Edilec mark, secure serialization label, and a restrained JSON boundary diagram.</desc>
+  <defs>
+    <pattern id="grid" width="40" height="40" patternUnits="userSpaceOnUse">
+      <path d="M40 0H0V40" fill="none" stroke="#ffffff" stroke-opacity="0.045"/>
+    </pattern>
+    <linearGradient id="edge" x1="0" y1="0" x2="0" y2="1">
+      <stop stop-color="#5ee6b8"/>
+      <stop offset="1" stop-color="#1f9d79"/>
+    </linearGradient>
+  </defs>
+  <rect width="1280" height="640" fill="#0b0f14"/>
+  <rect width="1280" height="640" fill="url(#grid)"/>
+  <rect x="64" y="64" width="8" height="512" rx="4" fill="url(#edge)"/>
+  <g transform="translate(92 70) scale(.5)" fill="#f7fafc">
+    <path d="m76.729 74.083c-20.208 1.853-40.258 12.034-62.863 26.338-.521.329-.633.205-.244-.273 20.185-24.751 64.581-45.388 103.577-41.614.905.088 2.876.534.654 2.607-10.966 10.476-22.296 20.479-33.233 30.992-2.885 2.792-6.077 3.413-9.693 2.164-9.973-4.023-20.689-6.162-31.805-4.08-.606.113-.716-.108-.238-.498 9.196-7.514 21.794-12.155 33.846-15.636zM41.015 72.807C59.029 54.525 80.655 40.005 99.973 23.302c3.511-3.036 4.341-1.761 4.592 2.431.433 7.21.811 14.446 1.189 21.671.188 3.581-1.009 4.966-4.195 5.283-26.2 2.609-47.123 13.283-60.343 20.389-.543.292-.634.171-.201-.269z"/>
+  </g>
+  <text x="170" y="108" fill="#cbd5df" font-family="Inter, ui-sans-serif, system-ui, sans-serif" font-size="22" font-weight="650" letter-spacing="3">EDILEC · OPEN SOURCE</text>
+  <text x="112" y="265" fill="#f7fafc" font-family="Inter, ui-sans-serif, system-ui, sans-serif" font-size="68" font-weight="720" letter-spacing="-2">inline-json-for-html</text>
+  <text x="116" y="323" fill="#aeb9c5" font-family="Inter, ui-sans-serif, system-ui, sans-serif" font-size="28" font-weight="450">JSON data that stays inside its HTML boundary.</text>
+  <g transform="translate(116 410)" font-family="Inter, ui-sans-serif, system-ui, sans-serif">
+    <rect width="486" height="66" rx="12" fill="#111820" stroke="#26333f"/>
+    <text x="24" y="42" fill="#5ee6b8" font-size="20" font-weight="650" letter-spacing="1.5">JAVASCRIPT LIBRARY · ZERO DEPENDENCIES</text>
+  </g>
+  <g transform="translate(830 150)" fill="none" stroke-linecap="round" stroke-linejoin="round">
+    <path d="M76 0H28C13 0 0 13 0 28v82c0 18-10 28-28 32 18 4 28 14 28 32v82c0 15 13 28 28 28h48" stroke="#5ee6b8" stroke-width="10"/>
+    <path d="M212 0h48c15 0 28 13 28 28v82c0 18 10 28 28 32-18 4-28 14-28 32v82c0 15-13 28-28 28h-48" stroke="#5ee6b8" stroke-width="10"/>
+    <path d="M106 88h76M106 142h76M106 196h76" stroke="#778694" stroke-width="8"/>
+    <circle cx="86" cy="88" r="6" fill="#f7fafc" stroke="none"/>
+    <circle cx="86" cy="142" r="6" fill="#f7fafc" stroke="none"/>
+    <circle cx="86" cy="196" r="6" fill="#f7fafc" stroke="none"/>
+  </g>
+  <text x="116" y="548" fill="#778694" font-family="ui-monospace, SFMono-Regular, Menlo, Consolas, monospace" font-size="19">github.com/edilec/inline-json-for-html</text>
+</svg>

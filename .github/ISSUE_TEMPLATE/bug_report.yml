@@ -1,0 +1,44 @@
+name: Bug report
+description: Report reproducible incorrect behavior in the supported script-element text context.
+title: "bug: "
+labels: [bug]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Do not disclose a suspected vulnerability here. Follow SECURITY.md instead.
+  - type: input
+    id: version
+    attributes:
+      label: Package version
+      placeholder: v0.1.1
+    validations:
+      required: true
+  - type: input
+    id: node
+    attributes:
+      label: Node.js version
+      placeholder: 24.14.0
+    validations:
+      required: true
+  - type: textarea
+    id: reproduction
+    attributes:
+      label: Minimal reproduction
+      description: Include input, options, output, and the exact embedding context.
+      render: javascript
+    validations:
+      required: true
+  - type: textarea
+    id: expected
+    attributes:
+      label: Expected behavior
+    validations:
+      required: true
+  - type: checkboxes
+    id: scope
+    attributes:
+      label: Scope confirmation
+      options:
+        - label: This report concerns JSON used as HTML script-element text.
+          required: true

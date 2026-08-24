@@ -1,6 +1,6 @@
 {
   "name": "inline-json-for-html",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "description": "Dependency-free JSON serialization for HTML script-element text.",
   "author": "Edilec Private Limited",
   "license": "MIT",
@@ -23,11 +23,22 @@
     "CHANGELOG.md",
     "LICENSE",
     "SECURITY.md",
-    "CONTRIBUTING.md"
+    "SUPPORT.md",
+    "MAINTAINERS.md",
+    "CONTRIBUTING.md",
+    "CODE_OF_CONDUCT.md",
+    "docs",
+    "examples"
   ],
   "scripts": {
     "test": "node --test",
-    "test:coverage": "node --test --experimental-test-coverage"
+    "test:coverage": "node --test --experimental-test-coverage --test-coverage-include=index.mjs --test-coverage-lines=100 --test-coverage-functions=100 --test-coverage-branches=100",
+    "lint": "node --check index.mjs && node --check scripts/check-doc-links.mjs && node --check scripts/verify-release.mjs && node --check examples/render-page.mjs",
+    "check:links": "node scripts/check-doc-links.mjs",
+    "pack:check": "npm pack --dry-run",
+    "check": "npm run lint && npm run check:links && npm run test:coverage && npm run pack:check",
+    "example": "node examples/render-page.mjs",
+    "release:verify": "node scripts/verify-release.mjs"
   },
   "repository": {
     "type": "git",
