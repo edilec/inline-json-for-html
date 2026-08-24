@@ -6,7 +6,7 @@ const root = resolve(dirname(fileURLToPath(import.meta.url)), '..')
 const packageJson = JSON.parse(await readFile(resolve(root, 'package.json'), 'utf8'))
 const changelog = await readFile(resolve(root, 'CHANGELOG.md'), 'utf8')
 const expectedTag = `v${packageJson.version}`
-const actualTag = process.env.GITHUB_REF_NAME ?? process.argv[2]
+const actualTag = process.argv[2] ?? process.env.GITHUB_REF_NAME
 
 if (!actualTag) {
   throw new Error('Provide a release tag as GITHUB_REF_NAME or the first argument.')
