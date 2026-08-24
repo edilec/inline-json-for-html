@@ -34,13 +34,13 @@ jobs:
         with:
           node-version: 24.x
       - name: Validate tag, package version, and changelog
-        env:
-          GITHUB_REF_NAME: ${{ inputs.tag }}
         shell: bash
         run: |
           set -euo pipefail
-          npm run release:verify -- "$RELEASE_TAG"
+          package_version="$(node -p "require('./package.json').version")"
+          test "$RELEASE_TAG" = "v$package_version"
           test "$(git describe --tags --exact-match HEAD)" = "$RELEASE_TAG"
+          grep -Fq "## $package_version -" CHANGELOG.md
       - name: Run project checks
         run: npm run check
       - name: Build checksummed release assets
