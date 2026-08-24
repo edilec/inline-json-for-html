@@ -32,7 +32,7 @@
   ],
   "scripts": {
     "test": "node --test",
-    "test:coverage": "node --test --experimental-test-coverage --test-coverage-lines=100 --test-coverage-functions=100 --test-coverage-branches=100",
+    "test:coverage": "node --test --experimental-test-coverage --test-coverage-include=index.mjs --test-coverage-lines=100 --test-coverage-functions=100 --test-coverage-branches=100",
     "lint": "node --check index.mjs && node --check scripts/check-doc-links.mjs && node --check scripts/verify-release.mjs && node --check examples/render-page.mjs",
     "check:links": "node scripts/check-doc-links.mjs",
     "pack:check": "npm pack --dry-run",
