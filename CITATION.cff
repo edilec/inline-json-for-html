@@ -1,0 +1,13 @@
+cff-version: 1.2.0
+message: "If you use this software, please cite it using the metadata in this file."
+title: "inline-json-for-html"
+type: software
+authors:
+  - name: "Edilec Private Limited"
+    website: "https://edilec.com/"
+abstract: "Dependency-free JSON serialization for HTML script-element text."
+version: "0.1.1"
+date-released: 2026-08-24
+license: MIT
+repository-code: "https://github.com/edilec/inline-json-for-html"
+url: "https://edilec.com/"
