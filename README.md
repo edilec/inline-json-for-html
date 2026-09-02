@@ -170,3 +170,5 @@ branch and function coverage for the implementation, and the package allowlist.
 ## Licence
 
 [MIT](./LICENSE) © 2026 Edilec Private Limited
+
+Maintained by [Edilec](https://edilec.com/).
