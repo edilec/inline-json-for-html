@@ -84,7 +84,46 @@ serializeInlineJson(value, {
 
 Options follow native `JSON.stringify` behavior with one deliberate
 restriction: `space` must be an integer from 0 through 10. A top-level value
-that cannot be represented as JSON throws instead of returning `undefined`.
+that cannot be represented as JSON throws instead of returning `undefined`, and
+the error distinguishes an `undefined` value from an unsupported type.
+
+### Supported values
+
+| Input | Result |
+| --- | --- |
+| Object, array, string, finite number, boolean, `null` | Serialized |
+| `Date`, or any value with `toJSON` | Serialized via `toJSON` |
+| Non-finite number (`NaN`, `±Infinity`) | `null` |
+| `undefined`, function, symbol — top level | Throws, naming the category |
+| `undefined`, function, symbol — nested | See `onUnsupported` below |
+| `BigInt` | Throws (native) |
+| Cyclic structure | Throws (native) |
+
+### `onUnsupported`
+
+JSON cannot represent `undefined`, functions or symbols. Native
+`JSON.stringify` drops such a property from an object and turns such an element
+into `null` in an array — silently, so embedded page data can end up missing
+fields the author expected to be there.
+
+- `'omit'` (default) keeps that native behavior exactly.
+- `'throw'` reports the value and its path instead:
+
+```js
+serializeInlineJson({ user: { id: 1, email: undefined } }, {
+  onUnsupported: 'throw',
+})
+// TypeError: Cannot represent the undefined value at user.email as JSON;
+//            remove it or serialize with onUnsupported: 'omit'.
+```
+
+Paths use dots for properties and brackets for array indices (`items[2].name`).
+Values are inspected after `toJSON` and after a function replacer, so a value
+that *becomes* unrepresentable is reported too.
+
+`onUnsupported: 'throw'` requires a function replacer or no replacer. An array
+replacer is a property allowlist that omits properties by design, so combining
+the two is rejected rather than given a confusing meaning.
 
 ## What it escapes
 
@@ -117,7 +156,8 @@ The detailed security assumptions and abuse cases are in
 ## Native JSON behavior retained
 
 - Cyclic values and `BigInt` values throw.
-- Unsupported object properties are omitted.
+- Unsupported object properties are omitted by default; set
+  `onUnsupported: 'throw'` to be told about them instead.
 - Non-finite numbers become `null`.
 - Getters, `toJSON`, and replacer callbacks execute normally.
 - A replacer or `toJSON` implementation can have side effects; this package
