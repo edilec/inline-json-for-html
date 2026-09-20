@@ -110,17 +110,21 @@ into `null` in an array — silently, so embedded page data can end up missing
 fields the author expected to be there.
 
 - `'omit'` (default) keeps that native behavior exactly.
-- `'throw'` reports the value and its path instead:
+- `'throw'` reports the value and its source position instead:
 
 ```js
 serializeInlineJson({ user: { id: 1, email: undefined } }, {
   onUnsupported: 'throw',
 })
-// TypeError: Cannot represent the undefined value at user.email as JSON;
+// TypeError: Cannot represent the undefined value at property[0].property[1] as JSON;
 //            remove it or serialize with onUnsupported: 'omit'.
 ```
 
-Paths use dots for properties and brackets for array indices (`items[2].name`).
+Object positions are zero-based in `JSON.stringify` visitation order; array
+positions keep their numeric indices (for example, `property[0][2]`). Raw
+property names are never copied into diagnostics, because they may contain
+control characters or private data. Distinct object and array locations remain
+distinguishable.
 Values are inspected after `toJSON` and after a function replacer, so a value
 that *becomes* unrepresentable is reported too.
 

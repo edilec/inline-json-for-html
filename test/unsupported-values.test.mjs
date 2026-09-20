@@ -46,17 +46,17 @@ test('omit is accepted explicitly and behaves like the default', () => {
   )
 })
 
-test('strict mode reports a dropped object property with its path', () => {
+test('strict mode reports a dropped object property by source position', () => {
   assert.throws(
     () => serializeInlineJson({ a: { b: undefined } }, { onUnsupported: 'throw' }),
-    /Cannot represent the undefined value at a\.b as JSON/,
+    /Cannot represent the undefined value at property\[0\]\.property\[0\] as JSON/,
   )
 })
 
 test('strict mode reports an unsupported array element with its index', () => {
   assert.throws(
     () => serializeInlineJson({ list: [1, Symbol('s')] }, { onUnsupported: 'throw' }),
-    /Cannot represent the symbol value at list\[1\] as JSON/,
+    /Cannot represent the symbol value at property\[0\]\[1\] as JSON/,
   )
   assert.throws(
     () => serializeInlineJson([() => {}], { onUnsupported: 'throw' }),
@@ -64,10 +64,10 @@ test('strict mode reports an unsupported array element with its index', () => {
   )
 })
 
-test('strict mode reports a top-level property without a leading separator', () => {
+test('strict mode reports a top-level property position without a leading separator', () => {
   assert.throws(
     () => serializeInlineJson({ missing: undefined }, { onUnsupported: 'throw' }),
-    /value at missing as JSON/,
+    /value at property\[0\] as JSON/,
   )
 })
 
@@ -90,7 +90,7 @@ test('strict mode inspects values after toJSON and after a function replacer', (
         { wrapped: { toJSON: () => undefined } },
         { onUnsupported: 'throw' },
       ),
-    /undefined value at wrapped as JSON/,
+    /undefined value at property\[0\] as JSON/,
   )
 
   assert.throws(
@@ -104,7 +104,7 @@ test('strict mode inspects values after toJSON and after a function replacer', (
           },
         },
       ),
-    /undefined value at a as JSON/,
+    /undefined value at property\[0\] as JSON/,
   )
 })
 
@@ -164,4 +164,27 @@ test('unknown option names cannot silently turn strict omission into a pass', ()
   assert.equal(getterCalled, false)
   const plain = Object.assign(Object.create(null), { onUnsupported: 'throw' })
   assert.throws(() => serializeInlineJson(value, plain), TypeError)
+})
+
+test('strict diagnostics locate properties without echoing or conflating raw keys', () => {
+  const messageFor = value => {
+    try {
+      serializeInlineJson(value, { onUnsupported: 'throw' })
+      assert.fail('strict serialization should refuse an unsupported value')
+    } catch (error) {
+      assert.ok(error instanceof TypeError)
+      return error.message
+    }
+  }
+  for (const key of ['a\nb', `a${String.fromCodePoint(0x202e)}b`,
+    'token=SYNTHETIC_SECRET_CANARY']) {
+    const message = messageFor({ [key]: undefined })
+    assert.equal(message.includes(key), false)
+    assert.equal(message.includes('\n'), false)
+    assert.equal(message.includes(String.fromCodePoint(0x202e)), false)
+    assert.equal(message.includes('SYNTHETIC_SECRET_CANARY'), false)
+    assert.match(message, /property\[0\]/)
+  }
+  assert.notEqual(messageFor({ 'a.b': undefined }), messageFor({ a: { b: undefined } }))
+  assert.notEqual(messageFor({ 'items[0]': undefined }), messageFor({ items: [undefined] }))
 })

@@ -76,9 +76,10 @@ function categorize(value) {
   return null
 }
 
-function childPath(holderPath, holder, key) {
-  if (Array.isArray(holder)) return `${holderPath}[${key}]`
-  return holderPath === '' ? key : `${holderPath}.${key}`
+function childPath(holderPath, holder, key, ordinal) {
+  if (Array.isArray(holder)) return `${holderPath}[${Number(key)}]`
+  const position = `property[${ordinal}]`
+  return holderPath === '' ? position : `${holderPath}.${position}`
 }
 
 /**
@@ -89,6 +90,7 @@ function childPath(holderPath, holder, key) {
  */
 function strictReplacer(replacer) {
   const paths = new WeakMap()
+  const nextOrdinals = new WeakMap()
   let rootSeen = false
 
   return function trackingReplacer(key, entry) {
@@ -98,14 +100,19 @@ function strictReplacer(replacer) {
     // first callback is the wrapper root, regardless of later property keys.
     if (!rootSeen) {
       rootSeen = true
-      if (next !== null && typeof next === 'object') paths.set(next, '')
+      if (next !== null && typeof next === 'object') {
+        paths.set(next, '')
+        nextOrdinals.set(next, 0)
+      }
       return next
     }
 
     // Every holder reached here was registered before JSON.stringify recursed
     // into it: the root is registered on the key === '' call above, and each
     // nested object is registered below before it becomes a holder in turn.
-    const path = childPath(paths.get(this), this, key)
+    const ordinal = nextOrdinals.get(this)
+    nextOrdinals.set(this, ordinal + 1)
+    const path = childPath(paths.get(this), this, key, ordinal)
     const category = categorize(next)
 
     if (category !== null) {
@@ -115,7 +122,10 @@ function strictReplacer(replacer) {
       )
     }
 
-    if (next !== null && typeof next === 'object') paths.set(next, path)
+    if (next !== null && typeof next === 'object') {
+      paths.set(next, path)
+      nextOrdinals.set(next, 0)
+    }
 
     return next
   }
