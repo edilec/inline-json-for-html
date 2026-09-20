@@ -82,8 +82,11 @@ serializeInlineJson(value, {
 })
 ```
 
-Options follow native `JSON.stringify` behavior with one deliberate
-restriction: `space` must be an integer from 0 through 10. A top-level value
+Options are a plain object with only `replacer`, `space`, and
+`onUnsupported` as own enumerable data properties; unknown or inherited
+options are rejected rather than silently changing the omission policy.
+The supported replacer and spacing behavior follows native `JSON.stringify`,
+except `space` must be an integer from 0 through 10. A top-level value
 that cannot be represented as JSON throws instead of returning `undefined`, and
 the error distinguishes an `undefined` value from an unsupported type.
 

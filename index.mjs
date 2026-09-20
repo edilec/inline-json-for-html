@@ -7,6 +7,7 @@ const JSON_ESCAPES = Object.freeze({
 })
 
 const UNSUPPORTED_HANDLING = Object.freeze(['omit', 'throw'])
+const OPTION_KEYS = Object.freeze(['replacer', 'space', 'onUnsupported'])
 
 function assertOptions(options) {
   if (options === undefined) return {}
@@ -14,8 +15,29 @@ function assertOptions(options) {
   if (options === null || typeof options !== 'object' || Array.isArray(options)) {
     throw new TypeError('Options must be an object when provided.')
   }
-
-  return options
+  let keys
+  let descriptors
+  try {
+    if (![Object.prototype, null].includes(Object.getPrototypeOf(options))) {
+      throw new TypeError('Options must be a plain object.')
+    }
+    keys = Reflect.ownKeys(options)
+    descriptors = Object.getOwnPropertyDescriptors(options)
+  } catch {
+    throw new TypeError('Options must be a plain object with data properties.')
+  }
+  const selected = {}
+  for (const key of keys) {
+    if (typeof key !== 'string' || !OPTION_KEYS.includes(key)) {
+      throw new TypeError('Unknown option.')
+    }
+    const descriptor = descriptors[key]
+    if (!Object.hasOwn(descriptor, 'value') || !descriptor.enumerable) {
+      throw new TypeError('Options must use enumerable data properties.')
+    }
+    selected[key] = descriptor.value
+  }
+  return selected
 }
 
 function assertSpace(space) {

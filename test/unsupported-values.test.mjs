@@ -139,3 +139,29 @@ test('rejects an unknown onUnsupported value', () => {
     /must be 'omit' or 'throw'/,
   )
 })
+
+test('unknown option names cannot silently turn strict omission into a pass', () => {
+  const value = { known: undefined }
+  assert.throws(() => serializeInlineJson(value, { onUnsupported: 'throw' }), TypeError)
+  assert.throws(
+    () => serializeInlineJson(value, { onUnsupproted: 'throw' }),
+    /Unknown option/,
+  )
+  const canary = 'token=SYNTHETIC_SECRET_CANARY'
+  assert.throws(
+    () => serializeInlineJson(value, { [canary]: 'throw' }),
+    error => error instanceof TypeError && !error.message.includes(canary),
+  )
+  assert.throws(
+    () => serializeInlineJson(value, { [Symbol('hidden')]: true }),
+    /Unknown option/,
+  )
+  const inherited = Object.create({ onUnsupported: 'throw' })
+  assert.throws(() => serializeInlineJson(value, inherited), /plain object/)
+  let getterCalled = false
+  const accessor = { get onUnsupported() { getterCalled = true; return 'throw' } }
+  assert.throws(() => serializeInlineJson(value, accessor), /data properties/)
+  assert.equal(getterCalled, false)
+  const plain = Object.assign(Object.create(null), { onUnsupported: 'throw' })
+  assert.throws(() => serializeInlineJson(value, plain), TypeError)
+})
