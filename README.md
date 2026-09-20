@@ -99,8 +99,8 @@ the error distinguishes an `undefined` value from an unsupported type.
 | Non-finite number (`NaN`, `±Infinity`) | `null` |
 | `undefined`, function, symbol — top level | Throws, naming the category |
 | `undefined`, function, symbol — nested | See `onUnsupported` below |
-| `BigInt` | Throws (native) |
-| Cyclic structure | Throws (native) |
+| `BigInt` | Throws a value-free `TypeError` |
+| Cyclic structure | Throws a value-free `TypeError` |
 
 ### `onUnsupported`
 
@@ -109,7 +109,8 @@ JSON cannot represent `undefined`, functions or symbols. Native
 into `null` in an array — silently, so embedded page data can end up missing
 fields the author expected to be there.
 
-- `'omit'` (default) keeps that native behavior exactly.
+- `'omit'` (default) keeps that native omission behavior for successful
+  serialization.
 - `'throw'` reports the value and its source position instead:
 
 ```js
@@ -169,6 +170,10 @@ The detailed security assumptions and abuse cases are in
 - Getters, `toJSON`, and replacer callbacks execute normally.
 - A replacer or `toJSON` implementation can have side effects; this package
   does not isolate user code.
+- Errors thrown during serialization are replaced with a value-free `TypeError`
+  unless they are this package's own positional strict-mode diagnostic. Native
+  cycle errors can otherwise echo private property names, and callback errors
+  can carry arbitrary input. The original error and cause are not attached.
 
 ## Architecture
 

@@ -9,6 +9,8 @@ const JSON_ESCAPES = Object.freeze({
 const UNSUPPORTED_HANDLING = Object.freeze(['omit', 'throw'])
 const OPTION_KEYS = Object.freeze(['replacer', 'space', 'onUnsupported'])
 
+class UnsupportedValueError extends TypeError {}
+
 function assertOptions(options) {
   if (options === undefined) return {}
 
@@ -116,7 +118,7 @@ function strictReplacer(replacer) {
     const category = categorize(next)
 
     if (category !== null) {
-      throw new TypeError(
+      throw new UnsupportedValueError(
         `Cannot represent the ${category} value at ${path} as JSON; ` +
           "remove it or serialize with onUnsupported: 'omit'.",
       )
@@ -167,7 +169,16 @@ export function serializeInlineJson(value, options) {
   }
 
   const effectiveReplacer = strict ? strictReplacer(replacer) : replacer
-  const serialized = JSON.stringify(value, effectiveReplacer, space)
+  let serialized
+  try {
+    serialized = JSON.stringify(value, effectiveReplacer, space)
+  } catch (error) {
+    // Native cycle diagnostics can contain raw object keys; callbacks may
+    // throw messages containing arbitrary input too. Preserve only our own
+    // positional strict diagnostic, never the original message or cause.
+    if (error instanceof UnsupportedValueError) throw error
+    throw new TypeError('JSON serialization failed; inspect the input and callbacks locally.')
+  }
 
   if (serialized === undefined) {
     throw new TypeError(
