@@ -67,11 +67,15 @@ function childPath(holderPath, holder, key) {
  */
 function strictReplacer(replacer) {
   const paths = new WeakMap()
+  let rootSeen = false
 
   return function trackingReplacer(key, entry) {
     const next = replacer === undefined ? entry : replacer.call(this, key, entry)
 
-    if (key === '') {
+    // JSON.stringify also permits an ordinary property named ''. Only its
+    // first callback is the wrapper root, regardless of later property keys.
+    if (!rootSeen) {
+      rootSeen = true
       if (next !== null && typeof next === 'object') paths.set(next, '')
       return next
     }

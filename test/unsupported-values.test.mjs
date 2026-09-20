@@ -71,6 +71,18 @@ test('strict mode reports a top-level property without a leading separator', () 
   )
 })
 
+test('strict mode inspects legal empty-name properties at root and nested levels', () => {
+  assert.equal(serializeInlineJson({ '': 1 }, { onUnsupported: 'throw' }), '{"":1}')
+  assert.throws(
+    () => serializeInlineJson({ '': undefined }, { onUnsupported: 'throw' }),
+    /Cannot represent the undefined value/,
+  )
+  assert.throws(
+    () => serializeInlineJson({ outer: { '': undefined } }, { onUnsupported: 'throw' }),
+    /Cannot represent the undefined value/,
+  )
+})
+
 test('strict mode inspects values after toJSON and after a function replacer', () => {
   assert.throws(
     () =>
