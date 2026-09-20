@@ -9,8 +9,6 @@ const JSON_ESCAPES = Object.freeze({
 const UNSUPPORTED_HANDLING = Object.freeze(['omit', 'throw'])
 const OPTION_KEYS = Object.freeze(['replacer', 'space', 'onUnsupported'])
 
-class UnsupportedValueError extends TypeError {}
-
 function assertOptions(options) {
   if (options === undefined) return {}
 
@@ -90,7 +88,7 @@ function childPath(holderPath, holder, key, ordinal) {
  * `'throw'`; otherwise the caller's replacer is passed through untouched so
  * native behaviour is preserved exactly.
  */
-function strictReplacer(replacer) {
+function strictReplacer(replacer, noteOwnError) {
   const paths = new WeakMap()
   const nextOrdinals = new WeakMap()
   let rootSeen = false
@@ -118,10 +116,12 @@ function strictReplacer(replacer) {
     const category = categorize(next)
 
     if (category !== null) {
-      throw new UnsupportedValueError(
+      const error = new TypeError(
         `Cannot represent the ${category} value at ${path} as JSON; ` +
           "remove it or serialize with onUnsupported: 'omit'.",
       )
+      noteOwnError(error)
+      throw error
     }
 
     if (next !== null && typeof next === 'object') {
@@ -168,7 +168,14 @@ export function serializeInlineJson(value, options) {
     )
   }
 
-  const effectiveReplacer = strict ? strictReplacer(replacer) : replacer
+  let ownError = null
+  let hasOwnError = false
+  const effectiveReplacer = strict
+    ? strictReplacer(replacer, error => {
+      ownError = error
+      hasOwnError = true
+    })
+    : replacer
   let serialized
   try {
     serialized = JSON.stringify(value, effectiveReplacer, space)
@@ -176,7 +183,9 @@ export function serializeInlineJson(value, options) {
     // Native cycle diagnostics can contain raw object keys; callbacks may
     // throw messages containing arbitrary input too. Preserve only our own
     // positional strict diagnostic, never the original message or cause.
-    if (error instanceof UnsupportedValueError) throw error
+    // Match the exact error created by this call: callbacks can throw a
+    // fabricated TypeError or even reuse a mutated error from an earlier call.
+    if (hasOwnError && error === ownError) throw error
     throw new TypeError('JSON serialization failed; inspect the input and callbacks locally.')
   }
 

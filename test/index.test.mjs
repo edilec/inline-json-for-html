@@ -144,6 +144,7 @@ test('getter and replacer exceptions do not echo their private messages', () => 
     () => serializeInlineJson(withGetter, { onUnsupported: 'throw' }),
     () => serializeInlineJson({ value: 1 }, { replacer: throwingReplacer }),
     () => serializeInlineJson({ value: 1 }, { replacer: throwingReplacer, onUnsupported: 'throw' }),
+    () => serializeInlineJson({ value: 1 }, { replacer: () => { throw null }, onUnsupported: 'throw' }),
   ]) {
     assert.throws(attempt, (error) => {
       assert.ok(error instanceof TypeError)
@@ -151,5 +152,30 @@ test('getter and replacer exceptions do not echo their private messages', () => 
       assert.equal(String(error.stack).includes(canary), false)
       return true
     })
+  }
+})
+
+test('a callback cannot forge or reuse a prior strict error to expose private text', () => {
+  let prior
+  assert.throws(() => serializeInlineJson({ missing: undefined }, { onUnsupported: 'throw' }), (error) => {
+    prior = error
+    return true
+  })
+  const canary = 'SYNTHETIC_SECRET_CANARY'
+  const fabricated = new prior.constructor(canary)
+  prior.message = canary
+
+  for (const thrown of [fabricated, prior]) {
+    for (const options of [
+      { replacer: () => { throw thrown } },
+      { replacer: () => { throw thrown }, onUnsupported: 'throw' },
+    ]) {
+      assert.throws(() => serializeInlineJson({ value: 1 }, options), (error) => {
+        assert.ok(error instanceof TypeError)
+        assert.ok(error.message.length > 0)
+        assert.equal(String(error.stack).includes(canary), false)
+        return true
+      })
+    }
   }
 })
