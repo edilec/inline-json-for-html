@@ -52,6 +52,13 @@ with a JSON Unicode escape. Because the serialized output contains no literal
 The escapes remain valid JSON and reconstruct the original characters when
 parsed.
 
+Serialization failures are also a report surface. Native cycle errors may
+include raw property names, and getters, `toJSON`, or replacer callbacks may
+throw messages containing arbitrary data. Except for this package's own
+source-position-only strict diagnostic, such errors are replaced with a
+value-free `TypeError` without the original message or cause. This does not
+stop callbacks from executing or undo their side effects.
+
 ## Trust assumptions
 
 - The surrounding HTML element and its attributes are created safely.

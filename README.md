@@ -82,9 +82,56 @@ serializeInlineJson(value, {
 })
 ```
 
-Options follow native `JSON.stringify` behavior with one deliberate
-restriction: `space` must be an integer from 0 through 10. A top-level value
-that cannot be represented as JSON throws instead of returning `undefined`.
+Options are a plain object with only `replacer`, `space`, and
+`onUnsupported` as own enumerable data properties; unknown or inherited
+options are rejected rather than silently changing the omission policy.
+The supported replacer and spacing behavior follows native `JSON.stringify`,
+except `space` must be an integer from 0 through 10. A top-level value
+that cannot be represented as JSON throws instead of returning `undefined`, and
+the error distinguishes an `undefined` value from an unsupported type.
+
+### Supported values
+
+| Input | Result |
+| --- | --- |
+| Object, array, string, finite number, boolean, `null` | Serialized |
+| `Date`, or any value with `toJSON` | Serialized via `toJSON` |
+| Non-finite number (`NaN`, `±Infinity`) | `null` |
+| `undefined`, function, symbol — top level | Throws, naming the category |
+| `undefined`, function, symbol — nested | See `onUnsupported` below |
+| `BigInt` | Throws a value-free `TypeError` |
+| Cyclic structure | Throws a value-free `TypeError` |
+
+### `onUnsupported`
+
+JSON cannot represent `undefined`, functions or symbols. Native
+`JSON.stringify` drops such a property from an object and turns such an element
+into `null` in an array — silently, so embedded page data can end up missing
+fields the author expected to be there.
+
+- `'omit'` (default) keeps that native omission behavior for successful
+  serialization.
+- `'throw'` reports the value and its source position instead:
+
+```js
+serializeInlineJson({ user: { id: 1, email: undefined } }, {
+  onUnsupported: 'throw',
+})
+// TypeError: Cannot represent the undefined value at property[0].property[1] as JSON;
+//            remove it or serialize with onUnsupported: 'omit'.
+```
+
+Object positions are zero-based in `JSON.stringify` visitation order; array
+positions keep their numeric indices (for example, `property[0][2]`). Raw
+property names are never copied into diagnostics, because they may contain
+control characters or private data. Distinct object and array locations remain
+distinguishable.
+Values are inspected after `toJSON` and after a function replacer, so a value
+that *becomes* unrepresentable is reported too.
+
+`onUnsupported: 'throw'` requires a function replacer or no replacer. An array
+replacer is a property allowlist that omits properties by design, so combining
+the two is rejected rather than given a confusing meaning.
 
 ## What it escapes
 
@@ -117,11 +164,16 @@ The detailed security assumptions and abuse cases are in
 ## Native JSON behavior retained
 
 - Cyclic values and `BigInt` values throw.
-- Unsupported object properties are omitted.
+- Unsupported object properties are omitted by default; set
+  `onUnsupported: 'throw'` to be told about them instead.
 - Non-finite numbers become `null`.
 - Getters, `toJSON`, and replacer callbacks execute normally.
 - A replacer or `toJSON` implementation can have side effects; this package
   does not isolate user code.
+- Errors thrown during serialization are replaced with a value-free `TypeError`
+  unless they are this package's own positional strict-mode diagnostic. Native
+  cycle errors can otherwise echo private property names, and callback errors
+  can carry arbitrary input. The original error and cause are not attached.
 
 ## Architecture
 

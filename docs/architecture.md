@@ -21,8 +21,11 @@ and the compatibility contract without improving the supported use case.
 
 - Invalid options fail before serialization.
 - Unsupported top-level values throw instead of returning `undefined`.
-- Native failures for cycles and `BigInt` are preserved.
-- Replacer, getter, or `toJSON` exceptions propagate unchanged.
+- Cycles and `BigInt` still fail with `TypeError`, but their native messages are
+  replaced with a value-free diagnostic because native cycle errors can name
+  private properties.
+- Replacer, getter, or `toJSON` exceptions are also replaced with a value-free
+  `TypeError`; callbacks still execute and can have side effects.
 
 ## Release boundary
 
