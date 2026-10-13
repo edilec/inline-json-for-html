@@ -69,6 +69,10 @@ async function render() {
 See [`examples/render-page.mjs`](./examples/render-page.mjs) for a complete,
 locally runnable example.
 
+The [public Edilec walkthrough](https://edilec.com/open-source/inline-json-for-html/)
+shows a synthetic script-end-tag value, the released v0.1.1 output, and the
+supported context. The library runs locally without an Edilec account or service.
+
 ## API
 
 ### `serializeInlineJson(value, options?)`
