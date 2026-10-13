@@ -1,6 +1,6 @@
 {
   "name": "inline-json-for-html",
-  "version": "0.1.1",
+  "version": "0.2.0",
   "description": "Dependency-free JSON serialization for HTML script-element text.",
   "author": "Edilec Private Limited",
   "license": "MIT",
