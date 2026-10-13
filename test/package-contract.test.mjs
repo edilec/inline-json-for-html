@@ -30,9 +30,9 @@ test('uses an explicit release tag instead of the workflow branch name', async (
   const verifyScript = fileURLToPath(
     new URL('../scripts/verify-release.mjs', import.meta.url),
   )
-  const { stdout } = await execFileAsync(process.execPath, [verifyScript, 'v0.1.1'], {
+  const { stdout } = await execFileAsync(process.execPath, [verifyScript, 'v0.2.0'], {
     env: { ...process.env, GITHUB_REF_NAME: 'main' },
   })
 
-  assert.equal(stdout, 'Verified release metadata for v0.1.1.\n')
+  assert.equal(stdout, 'Verified release metadata for v0.2.0.\n')
 })

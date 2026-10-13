@@ -19,7 +19,7 @@ characters through one documented serialization pass.
 
 | Item | Current support |
 | --- | --- |
-| Release | [`v0.1.1`](https://github.com/edilec/inline-json-for-html/releases/tag/v0.1.1) |
+| Release | [`v0.2.0`](https://github.com/edilec/inline-json-for-html/releases/tag/v0.2.0) |
 | Runtime | Node.js 22 or newer |
 | Module format | ESM; CommonJS can use dynamic `import()` |
 | Types | Bundled TypeScript declarations |
@@ -31,7 +31,7 @@ characters through one documented serialization pass.
 The package is currently distributed from its versioned GitHub release tag:
 
 ```sh
-npm install github:edilec/inline-json-for-html#v0.1.1
+npm install github:edilec/inline-json-for-html#v0.2.0
 ```
 
 Registry publication is intentionally not claimed until an npm release process

@@ -2,7 +2,7 @@
 
 All notable changes to this project are documented in this file.
 
-## Unreleased
+## 0.2.0 - 2026-10-14
 
 - Replace native and callback serialization error messages with a value-free
   `TypeError` so a cyclic key or callback exception cannot copy private input
